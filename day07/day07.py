@@ -1,6 +1,9 @@
 import re
+from numba import njit
+import numpy as np
 
-FIND_EQUATIONS_PATTERN = re.compile(r'(\d+): ((?:\d+ ?)+)\n')
+FIND_EQUATIONS_PATTERN = re.compile(r"(\d+): ((?:\d+ ?)+)\n")
+
 
 def get_input(file: str):
     with open(file, "r") as fd:
@@ -12,31 +15,41 @@ def get_input(file: str):
     return equations
 
 
-def can_be_true(test_value: int, remaining_numbers: list[int], current_sum: int = 0, concat: bool = False) -> bool:
+
+@njit()
+def can_be_true(
+    test_value: int,
+    remaining_numbers: list[int],
+    current_sum: None | int = None,
+    concat: bool = False,
+) -> bool:
     if len(remaining_numbers) == 0:
         if test_value == current_sum:
             return True
         return False
+    nxt = remaining_numbers[0]
+    rest = remaining_numbers[1:]
 
-    if current_sum == 0:
-        a, b, *rest = remaining_numbers
-        if can_be_true(test_value, rest, a + b, concat=concat):
-            return True
-        elif can_be_true(test_value, rest, a * b, concat=concat):
-            return True
-        elif concat and can_be_true(test_value, rest, int(str(a) + str(b)), concat=concat):
-            return True
-        return False
+    # Try +
+    curr = current_sum if current_sum is not None else 0
+    if can_be_true(test_value, rest, curr + nxt, concat=concat):
+        return True
 
-    nxt, *rest = remaining_numbers
-    if can_be_true(test_value, rest, current_sum + nxt, concat=concat):
+    # Try +
+    curr = current_sum if current_sum is not None else 1
+    if can_be_true(test_value, rest, curr * nxt, concat=concat):
         return True
-    elif can_be_true(test_value, rest, current_sum * nxt, concat=concat):
-        return True
-    elif concat and can_be_true(test_value, rest, int(str(current_sum) + str(nxt)), concat=concat):
-        return True
+
+    # Try ||
+    curr = current_sum if current_sum is not None else 0
+    if concat:
+        nxt_n_digits = np.floor(np.log10(nxt)) + 1
+        if can_be_true(
+            test_value, rest, curr * 10**nxt_n_digits + nxt, concat=concat
+        ):
+            return True
+
     return False
-
 
 
 def part1(input_file: str):
