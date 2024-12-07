@@ -1,8 +1,12 @@
 import numpy as np
 from numpy.typing import NDArray
 
+PART1_SAMPLE_ANSWER = 2
+PART2_SAMPLE_ANSWER = 4
+
+
 def get_input(file: str):
-    with open(file, 'r') as fd:
+    with open(file, "r") as fd:
         return fd.readlines()
 
 
@@ -28,10 +32,11 @@ def part1(input_file: str):
 
 def try_dampener(report: NDArray[np.int32]) -> bool | np.bool:
     for i in range(len(report)):
-        report_slice = np.concatenate((report[:i], report[i+1:]))
+        report_slice = np.concatenate((report[:i], report[i + 1 :]))
         if is_safe(report_slice):
             return True
     return False
+
 
 def part2(input_file: str):
     inp = get_input(input_file)
@@ -47,10 +52,41 @@ def part2(input_file: str):
     return sum
 
 
+#################################################
+##                                             ##
+##      Runner stuff beyond this point         ##
+##                                             ##
+#################################################
+import sys, os, time, contextlib
+
+
+def run(func, *args, **kwargs):
+    t0 = time.time()
+    return func(*args, **kwargs), time.time() - t0
+
+
+@contextlib.contextmanager
+def nostdout():
+    save_stdout = sys.stdout
+    sys.stdout = open(os.devnull, "w")
+    yield
+    sys.stdout = save_stdout
+
+
 if __name__ == "__main__":
-    print("Part 1 -- Sample:", part1("sample.txt"))
-    print("Part 1 --- Input:", part1("input.txt"))
+    sol, dt = run(part1, "sample.txt")
+    print(f"Part 1 -- Sample [{dt:6.2f}s]: {sol}")
+    assert sol == PART1_SAMPLE_ANSWER, f"{sol} != {PART1_SAMPLE_ANSWER}"
+
+    with nostdout():
+        sol, dt = run(part1, "input.txt")
+    print(f"Part 1 --- Input [{dt:6.2f}s]: {sol}")
 
     print()
-    print("Part 2 -- Sample:", part2("sample.txt"))
-    print("Part 2 --- Input:", part2("input.txt"))
+    sol, dt = run(part2, "sample.txt")
+    print(f"Part 2 -- Sample [{dt:6.2f}s]: {sol}")
+    assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
+
+    with nostdout():
+        sol, dt = run(part2, "input.txt")
+    print(f"Part 2 --- Input [{dt:6.2f}s]: {sol}")
