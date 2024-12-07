@@ -11,35 +11,32 @@ class Direction(Enum):
     LEFT = 2
     RIGHT = 3
 
+    def rot90(self) -> "Direction":
+        if self == Direction.UP:
+            return Direction.RIGHT
+        elif self == Direction.RIGHT:
+            return Direction.DOWN
+        elif self == Direction.DOWN:
+            return Direction.LEFT
+        elif self == Direction.LEFT:
+            return Direction.UP
+        raise ValueError("Invalid direction", self)
 
-def rot90(dir: Direction) -> Direction:
-    if dir == Direction.UP:
-        return Direction.RIGHT
-    elif dir == Direction.RIGHT:
-        return Direction.DOWN
-    elif dir == Direction.DOWN:
-        return Direction.LEFT
-    elif dir == Direction.LEFT:
-        return Direction.UP
-    raise ValueError("Invalid direction", dir)
+    def to_delta(self) -> tuple[int, int]:
+        if self == Direction.UP:
+            return (0, -1)
+        elif self == Direction.RIGHT:
+            return (1, 0)
+        elif self == Direction.DOWN:
+            return (0, 1)
+        elif self == Direction.LEFT:
+            return (-1, 0)
+        raise ValueError("Invalid direction", self)
 
-
-def to_delta(dir: Direction) -> tuple[int, int]:
-    if dir == Direction.UP:
-        return (0, -1)
-    elif dir == Direction.RIGHT:
-        return (1, 0)
-    elif dir == Direction.DOWN:
-        return (0, 1)
-    elif dir == Direction.LEFT:
-        return (-1, 0)
-    raise ValueError("Invalid direction", dir)
-
-
-def step(dir: Direction, position: tuple[int, int]) -> tuple[int, int]:
-    x, y = position
-    dx, dy = to_delta(dir)
-    return (x + dx, y + dy)
+    def step(self, position: tuple[int, int]) -> tuple[int, int]:
+        x, y = position
+        dx, dy = self.to_delta()
+        return (x + dx, y + dy)
 
 
 def get_input(file: str):
@@ -76,9 +73,9 @@ def walk_along_path(
     dir = direction
     yield pos, dir
     while is_within_map(pos, map_dimensions):
-        nxtPos = step(dir, pos)
+        nxtPos = dir.step(pos)
         if nxtPos in obstacles:
-            dir = rot90(dir)
+            dir = dir.rot90()
         else:
             pos = nxtPos
         if is_within_map(pos, map_dimensions):
@@ -102,7 +99,7 @@ def part2(input_file: str):
     has_visited = set()
     for node, dir in walk_along_path(obstacles, map_dimensions, starting_pos):
 
-        obstacle_pos = step(dir, node)
+        obstacle_pos = dir.step(node)
         if (
             obstacle_pos not in obstacles
             and obstacle_pos not in has_visited
@@ -111,7 +108,7 @@ def part2(input_file: str):
 
             visited = set()
             for n2 in walk_along_path(
-                {*obstacles, obstacle_pos}, map_dimensions, node, rot90(dir)
+                {*obstacles, obstacle_pos}, map_dimensions, node, dir.rot90()
             ):
                 if n2 in visited:
                     loops.add(obstacle_pos)
