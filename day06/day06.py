@@ -112,7 +112,7 @@ def part2(input_file: str):
                 {*obstacles, obstacle_pos}, map_dimensions, node, rot90(dir)
             ):
                 if n2 in visited:
-                    loops.add(n2[0])
+                    loops.add(obstacle_pos)
                     break
                 visited.add(n2)
 
