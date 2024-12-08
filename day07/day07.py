@@ -37,7 +37,7 @@ def can_be_true(
     if can_be_true(test_value, rest, curr + nxt, concat=concat):
         return True
 
-    # Try +
+    # Try *
     curr = current_sum if current_sum is not None else 1
     if can_be_true(test_value, rest, curr * nxt, concat=concat):
         return True
