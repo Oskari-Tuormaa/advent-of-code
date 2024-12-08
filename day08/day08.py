@@ -18,7 +18,7 @@ def get_input(file: str):
                 if cell not in nodes:
                     nodes[cell] = set()
                 nodes[cell].add((x, y))
-    return nodes, bounds, [list(x) for x in lines]
+    return nodes, bounds
 
 
 def pos_within_bounds(pos: tuple[int, int], bounds: tuple[int, int]) -> bool:
@@ -36,19 +36,14 @@ def yield_first_reflections(
         dx = x2 - x1
         dy = y2 - y1
 
-        r1 = (x1 - dx, y1 - dy)
-        r2 = (x2 + dx, y2 + dy)
-        yield r1
-        yield r2
+        yield x1 - dx, y1 - dy
+        yield x2 + dx, y2 + dy
 
 
 def yield_all_reflections_in_bounds(
     positions: list[tuple[int, int]], bounds: tuple[int, int]
 ) -> Generator[tuple[int, int], None, None]:
-    for (
-        n1,
-        n2,
-    ) in combinations(positions, 2):
+    for n1, n2 in combinations(positions, 2):
         x1, y1 = n1
         x2, y2 = n2
         dx = x2 - x1
@@ -58,43 +53,34 @@ def yield_all_reflections_in_bounds(
         while pos_within_bounds(p, bounds):
             yield p
             p = (p[0] - dx, p[1] - dy)
-        p = (x1 + dx, y1 + dy)
+        p = (x2 + dx, y2 + dy)
         while pos_within_bounds(p, bounds):
             yield p
             p = (p[0] + dx, p[1] + dy)
 
 
 def part1(input_file: str):
-    antennas, bounds, raw = get_input(input_file)
+    antennas, bounds = get_input(input_file)
 
     res = set()
     for nodes in antennas.values():
         for reflection in yield_first_reflections(nodes):
             if pos_within_bounds(reflection, bounds):
                 res.add(reflection)
-                x, y = reflection
-                raw[y][x] = "#"
-
-    print("\n".join(["".join(x) for x in raw]))
 
     return len(res)
 
 
 def part2(input_file: str):
-    antennas, bounds, raw = get_input(input_file)
+    antennas, bounds = get_input(input_file)
 
     res = set()
     for nodes in antennas.values():
         for reflection in yield_all_reflections_in_bounds(nodes, bounds):
-            if pos_within_bounds(reflection, bounds):
-                res.add(reflection)
-                x, y = reflection
-                raw[y][x] = "#"
+            res.add(reflection)
 
     all_antennas = {x for ant in antennas.values() for x in ant}
     res = res.union(all_antennas)
-
-    print("\n".join(["".join(x) for x in raw]))
 
     return len(res)
 

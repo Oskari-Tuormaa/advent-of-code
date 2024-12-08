@@ -22,42 +22,36 @@ def get_input(file: str):
 def can_be_true(
     test_value: int,
     remaining_numbers: list[int],
-    current_sum: None | int = None,
+    current_sum: int,
     concat: bool = False,
 ) -> bool:
     if len(remaining_numbers) == 0:
-        if test_value == current_sum:
-            return True
-        return False
+        return test_value == current_sum
+
     nxt = remaining_numbers[0]
     rest = remaining_numbers[1:]
 
-    # Try +
-    curr = current_sum if current_sum is not None else 0
-    if can_be_true(test_value, rest, curr + nxt, concat=concat):
-        return True
-
-    # Try *
-    curr = current_sum if current_sum is not None else 1
-    if can_be_true(test_value, rest, curr * nxt, concat=concat):
-        return True
-
-    # Try ||
-    curr = current_sum if current_sum is not None else 0
-    if concat:
-        nxt_n_digits = np.floor(np.log10(nxt)) + 1
-        if can_be_true(test_value, rest, curr * 10**nxt_n_digits + nxt, concat=concat):
-            return True
-
-    return False
+    return (
+        can_be_true(test_value, rest, current_sum + nxt, concat=concat)
+        or can_be_true(test_value, rest, current_sum * nxt, concat=concat)
+        or (
+            concat
+            and can_be_true(
+                test_value,
+                rest,
+                current_sum * 10 ** np.ceil(np.log10(nxt)) + nxt,
+                concat=concat,
+            )
+        )
+    )
 
 
 def part1(input_file: str):
     inp = get_input(input_file)
 
     res = 0
-    for test_value, number in inp:
-        if can_be_true(test_value, number):
+    for test_value, numbers in inp:
+        if can_be_true(test_value, numbers[1:], numbers[0]):
             res += test_value
 
     return res
@@ -67,8 +61,8 @@ def part2(input_file: str):
     inp = get_input(input_file)
 
     res = 0
-    for test_value, number in inp:
-        if can_be_true(test_value, number, concat=True):
+    for test_value, numbers in inp:
+        if can_be_true(test_value, numbers[1:], numbers[0], concat=True):
             res += test_value
 
     return res
