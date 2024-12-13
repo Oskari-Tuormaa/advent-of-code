@@ -1,9 +1,13 @@
 import re
 
+from itertools import starmap
+
 import sympy as sp
 
 PART1_SAMPLE_ANSWER = 480
 PART2_SAMPLE_ANSWER = 875318608908
+
+BTN_VALUES = sp.Matrix.diag([3, 1])
 
 
 def get_input(file: str):
@@ -12,7 +16,7 @@ def get_input(file: str):
 
     machines = []
     for machine in data.split("\n\n"):
-        ax, ay, bx, by, x, y = map(int, re.findall(r"\d+",machine))
+        ax, ay, bx, by, x, y = map(int, re.findall(r"\d+", machine))
         machines.append([sp.Matrix([ax, ay]), sp.Matrix([bx, by]), sp.Matrix([x, y])])
     return machines
 
@@ -25,28 +29,22 @@ def change_of_basis(v1: sp.Matrix, v2: sp.Matrix, point: sp.Matrix):
 def part1(input_file: str):
     machines = get_input(input_file)
 
-    res = 0
-    for machine in machines:
-        a, b, p = machine
-        bp = change_of_basis(a, b, p)
-        if all(i.is_Integer for i in bp):
-            res += bp[0]*3 + bp[1]
-
-    return res
+    return sum(
+        sum(BTN_VALUES * bp)
+        for bp in starmap(lambda a,b,p: change_of_basis(a,b,p), machines)
+        if all(i.is_Integer for i in bp)
+    )
 
 
 def part2(input_file: str):
     machines = get_input(input_file)
 
-    res = 0
-    for machine in machines:
-        a, b, p = machine
-        p += sp.Matrix([10000000000000]*2)
-        bp = change_of_basis(a, b, p)
-        if all(i.is_Integer for i in bp):
-            res += bp[0]*3 + bp[1]
-
-    return res
+    add = sp.Matrix([10000000000000] * 2)
+    return sum(
+        sum(BTN_VALUES * bp)
+        for bp in starmap(lambda a,b,p: change_of_basis(a,b,p+add), machines)
+        if all(i.is_Integer for i in bp)
+    )
 
 
 #################################################
