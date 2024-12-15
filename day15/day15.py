@@ -9,6 +9,7 @@ PART2_SAMPLE_ANSWER = 9021
 class Map:
     walls: set[tuple[int, int]]
     boxes: set[tuple[int, int]]
+    wide_boxes: set[tuple[int, int]]
     robot_position: tuple[int, int]
 
 
@@ -39,35 +40,57 @@ def get_input(file: str):
             elif cell == '@':
                 robot_position = (x, y)
 
-    return Map(walls, boxes, robot_position), moves
+    return Map(walls, boxes, set(), robot_position), moves
 
 
 def perform_move(map: Map, move: str) -> Map:
-    dx, dy = DIRS[move]
+    new_map = map
     rx, ry = map.robot_position
-    x, y = rx, ry
+    dx, dy = DIRS[move]
 
-    x += dx
-    y += dy
+    new_robot_position = (rx+dx, ry+dy)
 
-    box_to_move = None
-    while (x, y) in map.boxes:
-        box_to_move = (x, y)
-        x += dx
-        y += dy
+    to_move = set()
+    wide_to_move = set()
+    to_check = {new_robot_position}
+    while len(to_check) > 0:
+        p = to_check.pop()
+        x, y = p
 
-    if (x, y) in map.walls:
-        return map
+        if p in map.walls:
+            return map
 
-    new_robot_pos = (rx+dx, ry+dy)
-    if box_to_move is not None:
-        map.boxes.remove(new_robot_pos)
-        bx, by = box_to_move
-        map.boxes.add((bx+dx, by+dy))
+        if p in map.boxes:
+            to_move.add(p)
+            to_check.add((x+dx, y+dy))
 
-    map.robot_position = new_robot_pos
+        if (hit_lhs := p in map.wide_boxes) or (x-1, y) in map.wide_boxes:
+            bx, by = x if hit_lhs else x-1, y
 
-    return map
+            wide_to_move.add((bx, by))
+            if dx == 0:
+                to_check.add((bx, by+dy))
+                to_check.add((bx+1, by+dy))
+            elif move == '<':
+                to_check.add((bx-1, by))
+            elif move == '>':
+                to_check.add((bx+2, by))
+
+    for x, y in to_move:
+        if (x+dx, y+dy) not in map.boxes:
+            new_map.boxes.add((x+dx, y+dy))
+        if (x-dx, y-dy) not in to_move:
+            new_map.boxes.remove((x, y))
+
+    for x, y in wide_to_move:
+        if (x+dx, y+dy) not in map.wide_boxes:
+            new_map.wide_boxes.add((x+dx, y+dy))
+        if (x-dx, y-dy) not in wide_to_move:
+            new_map.wide_boxes.remove((x, y))
+
+    new_map.robot_position = new_robot_position
+
+    return new_map
 
 
 def part1(input_file: str):
@@ -97,42 +120,7 @@ def widen_map(map: Map) -> Map:
     rx, ry = map.robot_position
     robot_position = (rx*2, ry)
 
-    return Map(walls, boxes, robot_position)
-
-
-def perform_wide_move(map: Map, move: str) -> Map:
-    rx, ry = map.robot_position
-    dx, dy = DIRS[move]
-
-    to_move = set()
-    to_check = {(rx+dx, ry+dy)}
-    while len(to_check) != 0:
-        x, y = to_check.pop()
-
-        if (x, y) in map.walls:
-            return map
-
-        if (hit_lhs := (x, y) in map.boxes) or (x-1, y) in map.boxes:
-            bx, by = x if hit_lhs else x-1, y
-
-            to_move.add((bx, by))
-            if dx == 0:
-                to_check.add((bx, by+dy))
-                to_check.add((bx+1, by+dy))
-            elif move == '<':
-                to_check.add((bx-1, by))
-            elif move == '>':
-                to_check.add((bx+2, by))
-
-    moved_set = {(bx+dx, by+dy) for bx,by in to_move}
-    for (bx, by) in to_move:
-        map.boxes.remove((bx, by))
-    for box in moved_set:
-        map.boxes.add(box)
-
-    map.robot_position = (rx+dx, ry+dy)
-
-    return map
+    return Map(walls, set(), boxes, robot_position)
 
 
 def part2(input_file: str):
@@ -140,10 +128,10 @@ def part2(input_file: str):
     map = widen_map(map)
     
     for move in moves:
-        map = perform_wide_move(map, move)
+        map = perform_move(map, move)
 
     res = 0
-    for (bx, by) in map.boxes:
+    for (bx, by) in map.wide_boxes:
         res += bx + 100 * by
 
     return res
