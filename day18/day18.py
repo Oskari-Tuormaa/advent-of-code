@@ -118,10 +118,7 @@ def part2(input_file: str):
 
     for i in range(len(byts)):
         nx,ny = byts[i-1]
-        if (nx,ny) not in current_path or not (
-            all((x,ny) in byts[:i] for x in [-1,1] if 0 <= x < w) or
-            all((nx,y) in byts[:i] for y in [-1,1] if 0 <= y < h)
-        ):
+        if (nx,ny) not in current_path:
             continue
 
         nodes = astar(start, end, w, h, set(byts[:i]))
