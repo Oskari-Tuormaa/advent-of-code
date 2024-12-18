@@ -113,10 +113,21 @@ def part2(input_file: str):
     start = (0,0)
     end = (w-1,h-1)
 
+    nodes = astar(start, end, w, h, set())
+    current_path = list(traverse_reversed(nodes, end))
+
     for i in range(len(byts)):
+        nx,ny = byts[i-1]
+        if (nx,ny) not in current_path or not (
+            all((x,ny) in byts[:i] for x in [-1,1] if 0 <= x < w) or
+            all((nx,y) in byts[:i] for y in [-1,1] if 0 <= y < h)
+        ):
+            continue
+
         nodes = astar(start, end, w, h, set(byts[:i]))
         if end not in nodes:
             return byts[i-1]
+        current_path = list(traverse_reversed(nodes, end))
 
 
 #################################################
