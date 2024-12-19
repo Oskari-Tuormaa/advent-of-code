@@ -33,19 +33,17 @@ class cache:
 
 
 @cache
-def yield_arrangements(pattern: str, towels: list[str], yield_all: bool = False, depth: int = 0) -> int:
+def yield_arrangements(pattern: str, towels: list[str], yield_all: bool = False) -> int:
     res = 0
     if len(pattern) == 0:
         return 1
     for towel in towels:
         if pattern.startswith(towel):
             rest = pattern[len(towel):]
-            viable_towels = [t for t in towels if t in rest]
-
             if yield_all:
-                res += yield_arrangements(rest, viable_towels, yield_all=yield_all, depth=depth+1)
+                res += yield_arrangements(rest, towels, yield_all=yield_all)
             else:
-                return yield_arrangements(rest, viable_towels, yield_all=yield_all, depth=depth+1)
+                return yield_arrangements(rest, towels, yield_all=yield_all)
     return res
 
 
@@ -85,18 +83,18 @@ def nostdout():
 
 if __name__ == "__main__":
     sol, dt = run(part1, "sample.txt")
-    print(f"Part 1 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 1 -- Sample [{dt:7.3f}s]: {sol}")
     assert sol == PART1_SAMPLE_ANSWER, f"{sol} != {PART1_SAMPLE_ANSWER}"
 
-    # with nostdout():
-    sol, dt = run(part1, "input.txt")
-    print(f"Part 1 --- Input [{dt:6.2f}s]: {sol}")
+    with nostdout():
+        sol, dt = run(part1, "input.txt")
+    print(f"Part 1 --- Input [{dt:7.3f}s]: {sol}")
 
     print()
     sol, dt = run(part2, "sample.txt")
-    print(f"Part 2 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 -- Sample [{dt:7.3f}s]: {sol}")
     assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part2, "input.txt")
-    print(f"Part 2 --- Input [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 --- Input [{dt:7.3f}s]: {sol}")
