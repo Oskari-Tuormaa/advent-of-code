@@ -73,18 +73,18 @@ def nostdout():
 if __name__ == "__main__":
 
     sol, dt = run(part1, SAMPLE_INPUT)
-    print(f"Part 1 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 1 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART1_SAMPLE_ANSWER, f"{sol} != {PART1_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part1, PUZZLE_INPUT)
-    print(f"Part 1 --- Input [{dt:6.2f}s]: {sol}")
+    print(f"Part 1 --- Input [{dt:9.5f}s]: {sol}")
 
     print()
     sol, dt = run(part2, SAMPLE_INPUT)
-    print(f"Part 2 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part2, PUZZLE_INPUT)
-    print(f"Part 2 --- Input [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 --- Input [{dt:9.5f}s]: {sol}")

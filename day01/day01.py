@@ -45,18 +45,18 @@ def nostdout():
 
 if __name__ == "__main__":
     sol, dt = run(part1, "sample.txt")
-    print(f"Part 1 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 1 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART1_SAMPLE_ANSWER, f"{sol} != {PART1_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part1, "input.txt")
-    print(f"Part 1 --- Input [{dt:6.2f}s]: {sol}")
+    print(f"Part 1 --- Input [{dt:9.5f}s]: {sol}")
 
     print()
     sol, dt = run(part2, "sample.txt")
-    print(f"Part 2 -- Sample [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part2, "input.txt")
-    print(f"Part 2 --- Input [{dt:6.2f}s]: {sol}")
+    print(f"Part 2 --- Input [{dt:9.5f}s]: {sol}")
