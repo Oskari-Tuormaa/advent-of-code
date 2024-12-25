@@ -1,17 +1,12 @@
-import numpy as np
-
-from numba import njit
 from itertools import combinations
-from numpy.typing import NDArray
 from typing import Generator
 
 PART1_SAMPLE_ANSWER = 7
-PART2_SAMPLE_ANSWER = 0
+PART2_SAMPLE_ANSWER = "co,de,ka,ta"
 
 
 def get_input(file: str):
     with open(file, "r") as fd:
-        # return np.array(list(l.split('-') for l in fd.read().strip().splitlines()))
         data = list(l.split('-') for l in fd.read().strip().splitlines())
 
     computers = dict()
@@ -25,30 +20,37 @@ def get_input(file: str):
     return computers
 
 
-
-def yield_trios(connections: dict[str, set[str]]) -> Generator[set[str], None, None]:
+def yield_connected(connections: dict[str, set[str]], size: int) -> Generator[set[str], None, None]:
     done = []
     for comp, conn in connections.items():
-        for c1, c2 in combinations(conn, 2):
-            if c1 in connections[c2] and {comp, c1, c2} not in done:
-                done.append({comp, c1, c2})
-                yield {comp, c1, c2}
+        for to_check in combinations(conn, size-1):
+            if any(c1 not in connections[c2] for c1,c2 in combinations(to_check, 2)) or {comp, *to_check} in done:
+                continue
+            done.append({comp, *to_check})
+            yield {comp, *to_check}
+
+
+def find_largest_connection(connections: dict[str, set[str]]) -> set[str]:
+    size = max(len(conn) for conn in connections.values())
+
+    while size > 1:
+        try:
+            return next(yield_connected(connections, size))
+        except StopIteration:
+            size -= 1
+
+    return set()
 
 
 def part1(input_file: str):
     connections = get_input(input_file)
-
-    res = 0
-    for trio in yield_trios(connections):
-        if any(comp.startswith('t') for comp in trio):
-            res += 1
-
-    return res
+    return sum(1 for trio in yield_connected(connections, 3) if any(comp.startswith('t') for comp in trio))
 
 
 def part2(input_file: str):
-    inp = get_input(input_file)
-    return 0
+    connections = get_input(input_file)
+    largest_set = find_largest_connection(connections)
+    return ",".join(sorted(largest_set))
 
 
 #################################################
