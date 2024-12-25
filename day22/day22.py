@@ -1,6 +1,6 @@
 import numpy as np
 
-from numpy.typing import NDArray
+from numpy.lib.stride_tricks import sliding_window_view
 from numba import njit
 
 PART1_SAMPLE_ANSWER = 37327623
@@ -26,31 +26,43 @@ def next_secret(v: int) -> int:
 
 
 @njit
-def calc_nth_secret(v: int, n: int) -> int:
+def calc_nth_secret(v: int, n: int):
     for _ in range(n):
+        yield v
         v = next_secret(v)
-    return v
-
-
-@njit
-def calculate_secrets(seed: int, to: int) -> NDArray:
-    res = []
-    for i in range(to):
-        res.append(calc_nth_secret(seed, i))
-    return np.array(res)
+    yield v
 
 
 def part1(input_file: str):
     seeds = get_input(input_file)
-    return sum(calc_nth_secret(v, 2000) for v in seeds)
+    return sum(list(calc_nth_secret(v, 2000))[-1] for v in seeds)
 
 
 def part2(input_file: str):
     seeds = get_input(input_file)
 
-    print(calculate_secrets(seeds[0], 2000))
+    price_history = []
+    for seed in seeds:
+        price_history.append(list(calc_nth_secret(seed, 2000)))
+    price_history = np.array(price_history) % 10
 
-    return 0
+    diff_total_yields = dict()
+    for seller in price_history:
+
+        diff_yields = {}
+        diff = seller[1:] - seller[:-1]
+        for v, d in zip(seller[4:], sliding_window_view(diff, 4)):
+            d = tuple(int(x) for x in d)
+            if d not in diff_yields:
+                diff_yields[d] = int(v)
+
+        for k, v in diff_yields.items():
+            if k not in diff_total_yields:
+                diff_total_yields[k] = 0
+            diff_total_yields[k] += v
+
+    d, v = max(diff_total_yields.items(), key=lambda x: x[1])
+    return v
 
 
 #################################################
@@ -75,7 +87,7 @@ def nostdout():
 
 
 if __name__ == "__main__":
-    sol, dt = run(part1, "sample.txt")
+    sol, dt = run(part1, "sample1.txt")
     print(f"Part 1 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART1_SAMPLE_ANSWER, f"{sol} != {PART1_SAMPLE_ANSWER}"
 
@@ -84,7 +96,7 @@ if __name__ == "__main__":
     print(f"Part 1 --- Input [{dt:9.5f}s]: {sol}")
 
     print()
-    sol, dt = run(part2, "sample.txt")
+    sol, dt = run(part2, "sample2.txt")
     print(f"Part 2 -- Sample [{dt:9.5f}s]: {sol}")
     assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
 
