@@ -1,71 +1,24 @@
-import itertools
 import re
 
-from typing import Generator
+from itertools import pairwise
+from functools import cache
 
 PART1_SAMPLE_ANSWER = 126384
-PART2_SAMPLE_ANSWER = 0
-
 
 coord = tuple[int, int]
 
-
-KEYPAD = {
-    '0': (1,0),
-    'A': (2,0),
-    '1': (0,1),
-    '2': (1,1),
-    '3': (2,1),
-    '4': (0,2),
-    '5': (1,2),
-    '6': (2,2),
-    '7': (0,3),
-    '8': (1,3),
-    '9': (2,3),
-}
-
-RKEYPAD = {
-    (1,0): '0',
-    (2,0): 'A',
-    (0,1): '1',
-    (1,1): '2',
-    (2,1): '3',
-    (0,2): '4',
-    (1,2): '5',
-    (2,2): '6',
-    (0,3): '7',
-    (1,3): '8',
-    (2,3): '9',
-}
-
-DPAD = {
-    '<': (0,0),
-    'v': (1,0),
-    '>': (2,0),
-    '^': (1,1),
-    'A': (2,1),
-}
-
-RDPAD = {
-    (0,0): '<',
-    (1,0): 'v',
-    (2,0): '>',
-    (1,1): '^',
-    (2,1): 'A',
-}
+KEYPAD = [
+    ["7", "8", "9"],
+    ["4", "5", "6"],
+    ["1", "2", "3"],
+    [None, "0", 'A']
+]
 
 
-SGN_X = {
-    -1: '<',
-    0: '',
-    1: '>'
-}
-
-SGN_Y = {
-    -1: 'v',
-    0: '',
-    1: '^'
-}
+DPAD = [
+    [None, '^', 'A'],
+    ['<', 'v', '>'],
+]
 
 
 def get_input(file: str):
@@ -73,124 +26,93 @@ def get_input(file: str):
         return fd.read().strip().splitlines()
 
 
-def sign(v):
-    return v/abs(v) if v != 0 else 0
+def get_pos(arr: list[list[str|None]], code: str) -> coord:
+    for y, row in enumerate(arr):
+        if code in row:
+            return (row.index(code), y)
+    raise ValueError(f"{code} not found in {arr}")
 
 
-def path_to(pad: dict[str, coord], frm: str, to: str) -> str:
-    fromx, fromy = pad[frm]
-    tox, toy = pad[to]
+@cache
+def shortest_path_between(start: str | coord, end: str | coord, depth: int, first: bool = True) -> int:
+    if depth == 0:
+        return 1
+    
+    if isinstance(start, str):
+        start = get_pos(KEYPAD if first else DPAD, start)
+    if isinstance(end, str):
+        end = get_pos(KEYPAD if first else DPAD, end)
 
-    dx = tox - fromx
-    dy = toy - fromy
+    sx, sy = start
+    ex, ey = end
+    dx = abs(ex - sx) - 1
+    dy = abs(ey - sy) - 1
+    vert = None
+    hori = None
+    if ex > sx:
+        hori = '>'
+    elif ex < sx:
+        hori = '<'
+    if ey > sy:
+        vert = 'v'
+    elif ey < sy:
+        vert = '^'
 
-    chx = SGN_X[int(sign(dx))]
-    chy = SGN_Y[int(sign(dy))]
+    nxt = lambda frm,to: shortest_path_between(frm,to,depth=depth-1,first=False)
 
-    if (tox, fromy) not in pad.values():
-        return chy*abs(dy) + chx*abs(dx)
-    else:
-        return chx*abs(dx) + chy*abs(dy)
+    if hori is None and vert is None:
+        return 1
+    if hori is None and vert is not None:
+        return sum([
+            nxt('A', vert),
+            dy,
+            nxt(vert, 'A')
+        ])
+    if hori is not None and vert is None:
+        return sum([
+            nxt('A', hori),
+            dx,
+            nxt(hori, 'A')
+        ])
 
+    assert hori is not None and vert is not None
 
-def press_buttons(pad: dict[str, coord], path: str) -> str:
-    res = ""
-    for f, t in itertools.pairwise(path):
-        res += path_to(pad, f, t) + 'A'
-    return res
-
-
-def yield_path_to(pad: dict[str, coord], frm: str, to: str) -> Generator[str, None, None]:
-    fromx, fromy = pad[frm]
-    tox, toy = pad[to]
-
-    dx = tox - fromx
-    dy = toy - fromy
-
-    chx = SGN_X[int(sign(dx))]
-    chy = SGN_Y[int(sign(dy))]
-
-    if dx == 0 or dy == 0:
-        yield chx*abs(dx) + chy*abs(dy)
-        return
-
-    if (tox, fromy) in pad.values():
-        yield chx*abs(dx) + chy*abs(dy)
-    if (fromx, toy) in pad.values():
-        yield chy*abs(dy) + chx*abs(dx)
-
-
-def yield_press_buttons(pad: dict[str, coord], path: str) -> Generator[str, None, None]:
-    def yield_next(pad, path):
-        if len(path) < 2:
-            yield ''
-            return
-        for p in yield_path_to(pad, path[0], path[1]):
-            for n in yield_next(pad, path[1:]):
-                yield p+'A'+n
-    yield from yield_next(pad, path)
+    if (first and sy == 3 and ex == 0) or (not first and ex == 0):
+        return sum([
+            nxt('A', vert),
+            dy,
+            nxt(vert, hori),
+            dx,
+            nxt(hori, 'A')
+        ])
+    if (first and ey == 3 and sx == 0) or (not first and sx == 0):
+        return sum([
+            nxt('A', hori),
+            dx,
+            nxt(hori, vert),
+            dy,
+            nxt(vert, 'A')
+        ])
+    return min([
+        sum([
+            nxt('A', vert),
+            dy,
+            nxt(vert, hori),
+            dx,
+            nxt(hori, 'A')
+        ]),
+        sum([
+            nxt('A', hori),
+            dx,
+            nxt(hori, vert),
+            dy,
+            nxt(vert, 'A')
+        ])
+    ])
 
 
 def extract_number(v: str) -> int:
     return int("".join(re.findall(r"\d+", v)))
-
-
-DPAD_DRAW = """
-    +---+---+
-    | ^ | A |
-+---+---+---+
-| < | v | > |
-+---+---+---+
-"""
-
-KEYPAD_DRAW = """
-+---+---+---+
-| 7 | 8 | 9 |
-+---+---+---+
-| 4 | 5 | 6 |
-+---+---+---+
-| 1 | 2 | 3 |
-+---+---+---+
-    | 0 | A |
-    +---+---+
-"""
-
-def visualize_presses(sequence: str):
-    pos = [
-        DPAD['A'],
-        DPAD['A'],
-        KEYPAD['A'],
-    ]
-
-    delta = {
-        '>': (1, 0),
-        '<': (-1, 0),
-        'v': (0, -1),
-        '^': (0, 1),
-    }
-
-    code = ''
-
-    def perform_press(ch: str, pos: list[coord]) -> list[coord]:
-        nonlocal code
-        if ch == 'A':
-            if len(pos) > 1:
-                return [pos[0]] + perform_press(RDPAD[pos[0]], pos[1:])
-            # code += RKEYPAD[pos[0]]
-            return pos
-        dx, dy = delta[ch]
-        px, py = pos[0]
-        pos[0] = (px+dx, py+dy)
-        return pos
-
-    for i, p in enumerate(sequence):
-        print(sequence[:i])
-        print(code)
-        print(DPAD_DRAW.replace(RDPAD[pos[0]],   '\x1b[31m#\x1b[0m'))
-        print(DPAD_DRAW.replace(RDPAD[pos[1]],   '\x1b[31m#\x1b[0m'))
-        # print(KEYPAD_DRAW.replace(RKEYPAD[pos[2]], '\x1b[31m#\x1b[0m'))
-        input()
-        pos = perform_press(p, pos)
 
 
 def part1(input_file: str):
@@ -198,11 +120,11 @@ def part1(input_file: str):
 
     res = 0
     for code in codes:
-        r1 = [r for r in yield_press_buttons(KEYPAD, 'A'+code)]
-        r2 = [r for rr in r1 for r in yield_press_buttons(DPAD, 'A'+rr)]
-        r3 = [r for rr in r2 for r in yield_press_buttons(DPAD, 'A'+rr)]
-        best = min(r3, key=lambda x: len(x))
-        res += len(best) * extract_number(code)
+        smallest_path = sum(
+            shortest_path_between(frm, to, 3)
+            for frm,to in pairwise('A'+code)
+        )
+        res += extract_number(code) * smallest_path
 
     return res
 
@@ -210,7 +132,15 @@ def part1(input_file: str):
 def part2(input_file: str):
     codes = get_input(input_file)
 
-    return 0
+    res = 0
+    for code in codes:
+        smallest_path = sum(
+            shortest_path_between(frm, to, 26)
+            for frm,to in pairwise('A'+code)
+        )
+        res += extract_number(code) * smallest_path
+
+    return res
 
 
 #################################################
@@ -246,7 +176,6 @@ if __name__ == "__main__":
     print()
     sol, dt = run(part2, "sample.txt")
     print(f"Part 2 -- Sample [{dt:9.5f}s]: {sol}")
-    assert sol == PART2_SAMPLE_ANSWER, f"{sol} != {PART2_SAMPLE_ANSWER}"
 
     with nostdout():
         sol, dt = run(part2, "input.txt")
