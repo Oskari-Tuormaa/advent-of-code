@@ -17,6 +17,7 @@ NamespaceIndentation: None
 SpaceBeforeParens: ControlStatements
 
 # Brace & Flow Control Formatting
+BreakTemplateDeclarations: Yes
 BreakBeforeBraces: Mozilla
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
