@@ -14,3 +14,13 @@ nmap("<leader>E", function()
 
     vim.cmd(cmd)
 end)
+
+nmap("<leader>W", function()
+    local day_idx = vim.fn.input({
+        prompt="Day to watch"
+    })
+    local day = string.format("day%02d", day_idx)
+    local execute_cmd = "build/".. day .."/".. day
+
+    vim.cmd([[ sp term://bash -c 'fd \| entr -cs \"cmake --build build && ]].. execute_cmd ..[[\"' ]])
+end)
