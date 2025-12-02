@@ -2,28 +2,25 @@
 
 #include <chrono>
 #include <print>
+#include <ratio>
 
 extern void part1();
 extern void part2();
 
+template <typename Func>
+void measure_ms(Func&& f)
+{
+    auto t0 = std::chrono::high_resolution_clock::now();
+    f();
+    auto   t1 = std::chrono::high_resolution_clock::now();
+    double ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+    std::println(GREY ITALIC "took {:.3f} ms" RESET, ms);
+}
+
 int main()
 {
     std::println(GREEN BOLD "===== " DAY " =====" RESET);
-    std::chrono::high_resolution_clock clock {};
 
-    {
-        auto t0 = clock.now();
-        part1();
-        auto dt = clock.now() - t0;
-        std::println(GREY ITALIC "Part 1 took {}" RESET, dt);
-    }
-
-    {
-        auto t0 = clock.now();
-        part2();
-        auto dt = clock.now() - t0;
-        std::println(GREY ITALIC "Part 2 took {}" RESET, dt);
-    }
-
-    return 0;
+    measure_ms(part1);
+    measure_ms(part2);
 }
