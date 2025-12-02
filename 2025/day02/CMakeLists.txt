@@ -1,2 +1,7 @@
-add_executable(day02 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-target_include_directories(day02 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+get_filename_component(DAY ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+
+file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp")
+
+add_executable(${DAY} ${SOURCES})
+target_compile_definitions(${DAY} PRIVATE DAY="${DAY}")
+target_link_libraries(${DAY} PRIVATE common)
