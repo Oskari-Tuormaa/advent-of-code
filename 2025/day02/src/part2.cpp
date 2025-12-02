@@ -1,9 +1,8 @@
-#include "ansi.hpp"
-#include "input.hpp"
 #include "common.hpp"
+#include "input.hpp"
 
-#include <print>
 #include <cmath>
+#include <print>
 
 bool is_repeating(long number, int n_digits, int period)
 {
@@ -31,10 +30,8 @@ bool is_valid2(long number)
     return false;
 }
 
-
 void part2()
 {
-    std::println(PURPLE BOLD "### Part 2 ###" RESET);
     std::println("test: {}", sum_valid_ids(test_input, is_valid2));
     std::println("real: {}", sum_valid_ids(real_input, is_valid2));
 }

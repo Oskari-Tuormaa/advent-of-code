@@ -1,4 +1,3 @@
-#include "ansi.hpp"
 #include "common.hpp"
 #include "input.hpp"
 
@@ -20,7 +19,6 @@ bool is_valid1(long number)
 
 void part1()
 {
-    std::println(PURPLE "### Part 1 ###" RESET);
     std::println("Result test: {}", sum_valid_ids(test_input, is_valid1));
     std::println("Result real: {}", sum_valid_ids(real_input, is_valid1));
 }

@@ -21,6 +21,9 @@ int main()
 {
     std::println(GREEN BOLD "===== " DAY " =====" RESET);
 
+    std::println("\n" PURPLE "### Part 1 ###" RESET);
     measure_ms(part1);
+
+    std::println("\n" PURPLE "### Part 2 ###" RESET);
     measure_ms(part2);
 }

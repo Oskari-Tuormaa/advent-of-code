@@ -1,4 +1,3 @@
-#include "ansi.hpp"
 #include "input.hpp"
 
 #include <print>
@@ -21,7 +20,6 @@ int calculate_password_0x434C49434B(std::span<const Move> moves)
 
 void part2()
 {
-    std::println(PURPLE BOLD "### Part 2 ###" RESET);
     int res;
 
     res = calculate_password_0x434C49434B(test_input);
