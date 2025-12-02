@@ -6,3 +6,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Release)
 
 add_subdirectory(day01)
+add_subdirectory(day02)
