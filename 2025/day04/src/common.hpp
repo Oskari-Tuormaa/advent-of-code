@@ -1,7 +1,7 @@
 #ifndef COMMON_HPP_INCLUDED
 #define COMMON_HPP_INCLUDED
 
-#include "input.hpp"
+#include "parse.hpp"
 
 inline int count_neighbors(const Grid& grid, int x, int y)
 {

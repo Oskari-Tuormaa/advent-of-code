@@ -9,6 +9,7 @@
 #define RED    ESC "31m"
 #define GREEN  ESC "32m"
 #define PURPLE ESC "34m"
+#define CYAN   ESC "36m"
 #define GREY   ESC "38;5;244m"
 
 #define RESET ESC "0m"

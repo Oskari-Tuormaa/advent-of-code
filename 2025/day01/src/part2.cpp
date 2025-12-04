@@ -1,30 +1,18 @@
-#include "input.hpp"
+#include "parse.hpp"
 
 #include <print>
 
-int calculate_password_0x434C49434B(std::span<const Move> moves)
-{
+void part2(ParseType d) {
     int res  = 0;
     int dial = 50;
 
-    for (auto [dir, len] : moves) {
+    for (auto [dir, len] : d) {
         for (int i = 0; i < len; i++) {
-            dial = (dir == Dir::RIGHT ? dial + 1 : dial - 1) % 100;
+            dial = (dir == Dir::Right ? dial + 1 : dial - 1) % 100;
             if (dial == 0)
                 res++;
         }
     }
 
-    return res;
-}
-
-void part2()
-{
-    int res;
-
-    res = calculate_password_0x434C49434B(test_input);
-    std::println("Result test: {}", res);
-
-    res = calculate_password_0x434C49434B(real_input);
-    std::println("Result real: {}", res);
+    std::println("{}", res);
 }

@@ -1,11 +1,14 @@
 #include "ansi.hpp"
+#include "input.hpp"
+#include "parse.hpp"
 
 #include <chrono>
 #include <print>
 #include <ratio>
 
-extern void part1();
-extern void part2();
+extern ParseType parse(std::string_view);
+extern void      part1(ParseType);
+extern void      part2(ParseType);
 
 template <typename Func>
 void measure_ms(Func&& f)
@@ -21,9 +24,23 @@ int main()
 {
     std::println(GREEN BOLD "===== " DAY " =====" RESET);
 
-    std::println("\n" PURPLE "### Part 1 ###" RESET);
-    measure_ms(part1);
+    {
+        std::println("\n" PURPLE "### Part 1 ###" RESET);
+        std::println(CYAN ITALIC "Test:" RESET);
+        part1(parse(test_input));
 
-    std::println("\n" PURPLE "### Part 2 ###" RESET);
-    measure_ms(part2);
+        std::println(CYAN ITALIC "Real:" RESET);
+        auto d = parse(real_input);
+        measure_ms([&d] { part1(d); });
+    }
+
+    {
+        std::println("\n" PURPLE "### Part 2 ###" RESET);
+        std::println(CYAN ITALIC "Test:" RESET);
+        part2(parse(test_input));
+
+        std::println(CYAN ITALIC "Real:" RESET);
+        auto d = parse(real_input);
+        measure_ms([&d] { part2(d); });
+    }
 }

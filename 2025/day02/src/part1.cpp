@@ -1,5 +1,5 @@
 #include "common.hpp"
-#include "input.hpp"
+#include "parse.hpp"
 
 #include <cmath>
 #include <print>
@@ -17,8 +17,7 @@ bool is_valid1(long number)
     return upper == lower;
 }
 
-void part1()
+void part1(ParseType d)
 {
-    std::println("Result test: {}", sum_valid_ids(test_input, is_valid1));
-    std::println("Result real: {}", sum_valid_ids(real_input, is_valid1));
+    std::println("{}", sum_valid_ids(d, is_valid1));
 }

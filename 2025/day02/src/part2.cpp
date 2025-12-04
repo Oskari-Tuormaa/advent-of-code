@@ -1,5 +1,5 @@
 #include "common.hpp"
-#include "input.hpp"
+#include "parse.hpp"
 
 #include <cmath>
 #include <print>
@@ -30,8 +30,7 @@ bool is_valid2(long number)
     return false;
 }
 
-void part2()
+void part2(ParseType d)
 {
-    std::println("test: {}", sum_valid_ids(test_input, is_valid2));
-    std::println("real: {}", sum_valid_ids(real_input, is_valid2));
+    std::println("{}", sum_valid_ids(d, is_valid2));
 }

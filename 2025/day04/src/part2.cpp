@@ -1,8 +1,7 @@
 #include "common.hpp"
-#include "input.hpp"
+#include "parse.hpp"
 
 #include <print>
-#include <span>
 
 int remove_rolls(Grid& grid)
 {
@@ -30,7 +29,7 @@ int remove_rolls(Grid& grid)
     return res;
 }
 
-int remove_until_inaccessible(Grid grid)
+void part2(ParseType grid)
 {
     int res = 0;
 
@@ -41,11 +40,5 @@ int remove_until_inaccessible(Grid grid)
         res += removed;
     }
 
-    return res;
-}
-
-void part2()
-{
-    std::println("test_input: {}", remove_until_inaccessible(parse_input(test_input)));
-    std::println("real_input: {}", remove_until_inaccessible(parse_input(real_input)));
+    std::println("{}", res);
 }
