@@ -2,7 +2,10 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <functional>
 #include <print>
+
+using namespace std::placeholders;
 
 bool do_ranges_overlap(Range r1, Range r2)
 {
@@ -16,7 +19,7 @@ Range combine_ranges(Range r1, Range r2)
 
 void emplace_or_combine(std::vector<Range>& ranges, Range r)
 {
-    auto overlap = std::ranges::find_if(ranges, [r](auto v) { return do_ranges_overlap(v, r); });
+    auto overlap = std::ranges::find_if(ranges, std::bind(do_ranges_overlap, _1, r));
     if (overlap != ranges.end()) {
         Range new_r = combine_ranges(*overlap, r);
         ranges.erase(overlap);
