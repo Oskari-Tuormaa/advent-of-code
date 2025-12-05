@@ -6,7 +6,6 @@
 #include <print>
 #include <ratio>
 
-extern ParseType parse(std::string_view);
 extern void      part1(ParseType);
 extern void      part2(ParseType);
 
