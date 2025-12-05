@@ -29,5 +29,4 @@ IncludeBlocks: Regroup
 
 # Layout
 BinPackArguments: true
-BinPackLongBracedList: true
 ColumnLimit: 100
