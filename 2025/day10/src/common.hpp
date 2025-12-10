@@ -1,0 +1,4 @@
+#ifndef COMMON_HPP_INCLUDED
+#define COMMON_HPP_INCLUDED
+
+#endif // ifndef COMMON_HPP_INCLUDED
