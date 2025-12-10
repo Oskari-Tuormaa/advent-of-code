@@ -1,0 +1,145 @@
+#include "ansi.hpp"
+#include "parse.hpp"
+
+#include <print>
+
+enum Cell
+{
+    Unknown,
+    Good,
+    Corner,
+    Bad
+};
+
+constexpr const char* to_str(const Cell& c)
+{
+    switch (c) {
+        case Unknown:
+            return GREY "." RESET;
+        case Good:
+            return GREEN "#" RESET;
+        case Bad:
+            return PURPLE "." RESET;
+        case Corner:
+            return RED "C" RESET;
+    }
+    return "";
+}
+
+struct Grid
+{
+    long              w, h;
+    long              offx, offy;
+    std::vector<Cell> data;
+
+    Grid(long w, long h, long offx, long offy)
+        : w { w }
+        , h { h }
+        , offx { offx }
+        , offy { offy }
+    {
+        auto size = (w - offx + 2) * (h - offy + 2);
+        std::println("Creating data with {}", size);
+        data.resize(size, Cell::Unknown);
+    }
+
+    Cell& operator[](long x, long y)
+    {
+        auto rx = x - offx;
+        auto ry = y - offy;
+        return data[rx + ry * w];
+    }
+
+    const Cell& operator[](long x, long y) const
+    {
+        auto rx = x - offx;
+        auto ry = y - offy;
+        return data[rx + ry * w];
+    }
+};
+
+Grid generate_map(const ParseType& d)
+{
+    long minx = 1000000;
+    long maxx = 0;
+    long miny = 1000000;
+    long maxy = 0;
+
+    for (auto [x, y] : d) {
+        minx = std::min(minx, x);
+        maxx = std::max(maxx, x);
+        miny = std::min(miny, y);
+        maxy = std::max(maxy, y);
+    }
+
+    std::println("{},{} - {},{}", minx, miny, maxx, maxy);
+
+    Grid map { maxx, maxy, minx, miny };
+
+    // Add edges
+    for (auto [p1, p2] : d | std::views::adjacent<2>) {
+        auto [x1, y1] = p1;
+        auto [x2, y2] = p2;
+
+        if (x1 == x2) {
+            for (auto y = std::min(y1, y2); y <= std::max(y1, y2); y++) {
+                map[x1, y] = Cell::Good;
+            }
+        }
+        if (y1 == y2) {
+            for (auto x = std::min(x1, x2); x <= std::max(x1, x2); x++) {
+                map[x, y1] = Cell::Good;
+            }
+        }
+
+        map[x1, y1] = Cell::Corner;
+        map[x2, y2] = Cell::Corner;
+    }
+
+    // Fill
+    for (auto x = minx; x <= maxx; x++) {
+        bool is_skipping = false;
+        bool is_good     = false;
+        for (auto y = miny; y <= maxy; y++) {
+            if (x == minx) {
+                std::println("{},{} = {}  {}", x - minx, y - miny, is_skipping, is_good);
+            }
+
+            if (is_skipping && map[x, y] != Cell::Unknown) {
+                continue;
+            }
+            is_skipping = false;
+
+            if (map[x, y] == Cell::Corner) {
+                is_skipping = true;
+                continue;
+            }
+
+            if (map[x, y] == Cell::Good) {
+                is_good = !is_good;
+                continue;
+            }
+
+            map[x, y] = is_good ? Cell::Good : Cell::Bad;
+        }
+    }
+
+    return map;
+}
+
+void draw_map(const Grid& map)
+{
+    for (long y = map.offy; y <= map.h; y++) {
+        for (long x = map.offx; x <= map.w; x++) {
+            std::print("{}", to_str(map[x, y]));
+        }
+        std::println();
+    }
+}
+
+void part2(ParseType d)
+{
+    auto map = generate_map(d);
+    draw_map(map);
+    std::println("done");
+}
