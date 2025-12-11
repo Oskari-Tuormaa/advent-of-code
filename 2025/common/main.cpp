@@ -26,7 +26,7 @@ int main()
     {
         std::println("\n" PURPLE "### Part 1 ###" RESET);
         std::println(CYAN ITALIC "Test:" RESET);
-        part1(parse(test_input));
+        part1(parse(test_input1));
 
         std::println(CYAN ITALIC "Real:" RESET);
         auto d = parse(real_input);
@@ -36,7 +36,7 @@ int main()
     {
         std::println("\n" PURPLE "### Part 2 ###" RESET);
         std::println(CYAN ITALIC "Test:" RESET);
-        part2(parse(test_input));
+        part2(parse(test_input2));
 
         std::println(CYAN ITALIC "Real:" RESET);
         auto d = parse(real_input);
